@@ -1,0 +1,29 @@
+name: Build APK
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assemble project
+        run: |
+          mkdir -p app/src/main/assets app/src/main/java/com/classgames/app app/src/main/res/mipmap-xxhdpi app/src/main/res/mipmap-xxxhdpi app/src/main/res/drawable
+          cp index.html app/src/main/assets/index.html
+          cp MainActivity.java app/src/main/java/com/classgames/app/MainActivity.java
+          cp AndroidManifest.xml app/src/main/AndroidManifest.xml
+          cp ic_launcher_144.png app/src/main/res/mipmap-xxhdpi/ic_launcher.png
+          cp ic_launcher_192.png app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+          cp banner.png app/src/main/res/drawable/banner.png
+          cp app-build.gradle app/build.gradle
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '17' }
+      - uses: gradle/actions/setup-gradle@v4
+        with: { gradle-version: '8.9' }
+      - run: gradle assembleDebug --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ClassGames-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
